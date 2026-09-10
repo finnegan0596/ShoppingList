@@ -8,7 +8,7 @@ account required &mdash; everything is stored locally on your device.
 - **Add items by typing a name.** Previously used item names are remembered
   and suggested again as autocomplete options, so you don't have to retype
   "Milk" every week.
-- **Shops.** Add the shops you use (e.g. SuperValu, Lidl, Aldi) and tag each
+- **Shops.** Add the shops you use and tag each
   item with the shop(s) it's available at.
 - **Filter by shop.** When you're at a particular shop, filter your list down
   to just the items tagged for that shop.
