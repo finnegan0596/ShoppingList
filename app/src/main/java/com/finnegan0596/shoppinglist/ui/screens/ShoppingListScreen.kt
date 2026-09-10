@@ -1,5 +1,6 @@
 package com.finnegan0596.shoppinglist.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -7,21 +8,21 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -29,6 +30,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -236,7 +238,6 @@ private fun EditItemShopsDialog(
     )
 }
 
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 private fun AddItemDialog(
     viewModel: ShoppingListViewModel,
@@ -257,37 +258,44 @@ private fun AddItemDialog(
         title = { Text("Add item") },
         text = {
             Column {
-                ExposedDropdownMenuBox(
-                    expanded = expanded && suggestions.isNotEmpty(),
-                    onExpandedChange = { expanded = it }
-                ) {
-                    OutlinedTextField(
-                        value = name,
-                        onValueChange = {
-                            name = it
-                            expanded = true
-                        },
-                        label = { Text("Item name") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    DropdownMenu(
-                        expanded = expanded && suggestions.isNotEmpty(),
-                        onDismissRequest = { expanded = false },
-                        properties = androidx.compose.ui.window.PopupProperties(focusable = false)
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = {
+                        name = it
+                        expanded = true
+                    },
+                    label = { Text("Item name") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                // Suggestions are rendered inline (not as a DropdownMenu/Popup) because a Popup
+                // nested inside this AlertDialog's own window can be torn down out of order when
+                // the dialog is dismissed (e.g. tapping "Add" while suggestions are showing),
+                // which crashes the app with a WindowManager.BadTokenException.
+                if (expanded && suggestions.isNotEmpty()) {
+                    Surface(
+                        tonalElevation = 3.dp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 160.dp)
                     ) {
-                        suggestions.take(8).forEach { suggestion ->
-                            DropdownMenuItem(
-                                text = { Text(suggestion) },
-                                onClick = {
-                                    name = suggestion
-                                    expanded = false
-                                    val existing = appData.items.firstOrNull { it.name == suggestion }
-                                    if (existing != null) {
-                                        selectedShopIds.value = existing.shopIds.toSet()
-                                    }
-                                }
-                            )
+                        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                            suggestions.take(8).forEach { suggestion ->
+                                Text(
+                                    text = suggestion,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            name = suggestion
+                                            expanded = false
+                                            val existing = appData.items.firstOrNull { it.name == suggestion }
+                                            if (existing != null) {
+                                                selectedShopIds.value = existing.shopIds.toSet()
+                                            }
+                                        }
+                                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                                )
+                            }
                         }
                     }
                 }
