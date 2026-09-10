@@ -8,12 +8,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
@@ -46,6 +49,7 @@ fun ShoppingListScreen(viewModel: ShoppingListViewModel) {
     val appData by viewModel.data.collectAsState()
     val selectedShopFilter by viewModel.selectedShopFilter.collectAsState()
     var showAddDialog by remember { mutableStateOf(false) }
+    var itemToEdit by remember { mutableStateOf<Item?>(null) }
 
     val shops = appData.shops
     val cartItems = appData.items
@@ -96,6 +100,7 @@ fun ShoppingListScreen(viewModel: ShoppingListViewModel) {
                             item = item,
                             shopNames = item.shopIds.mapNotNull { id -> shops.firstOrNull { it.id == id }?.name },
                             onTogglePurchased = { viewModel.setPurchased(item.id, !item.purchased) },
+                            onEdit = { itemToEdit = item },
                             onRemove = { viewModel.removeFromCart(item.id) }
                         )
                     }
@@ -118,6 +123,14 @@ fun ShoppingListScreen(viewModel: ShoppingListViewModel) {
             onDismiss = { showAddDialog = false }
         )
     }
+
+    itemToEdit?.let { item ->
+        EditItemShopsDialog(
+            viewModel = viewModel,
+            item = item,
+            onDismiss = { itemToEdit = null }
+        )
+    }
 }
 
 @Composable
@@ -125,6 +138,7 @@ private fun ShoppingListRow(
     item: Item,
     shopNames: List<String>,
     onTogglePurchased: () -> Unit,
+    onEdit: () -> Unit,
     onRemove: () -> Unit
 ) {
     ListItem(
@@ -141,9 +155,83 @@ private fun ShoppingListRow(
             { Text(shopNames.joinToString(", ")) }
         } else null,
         trailingContent = {
-            IconButton(onClick = onRemove) {
-                Icon(Icons.Filled.Delete, contentDescription = "Remove from list")
+            Row {
+                IconButton(onClick = onEdit) {
+                    Icon(Icons.Filled.Edit, contentDescription = "Edit shops for this item")
+                }
+                IconButton(onClick = onRemove) {
+                    Icon(Icons.Filled.Delete, contentDescription = "Remove from list")
+                }
             }
+        }
+    )
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ShopChipSelector(
+    shops: List<com.finnegan0596.shoppinglist.data.Shop>,
+    selectedShopIds: Set<String>,
+    onToggle: (String) -> Unit
+) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        shops.forEach { shop ->
+            FilterChip(
+                selected = selectedShopIds.contains(shop.id),
+                onClick = { onToggle(shop.id) },
+                label = { Text(shop.name) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun EditItemShopsDialog(
+    viewModel: ShoppingListViewModel,
+    item: Item,
+    onDismiss: () -> Unit
+) {
+    val appData by viewModel.data.collectAsState()
+    val selectedShopIds = remember(item.id) { mutableStateOf(item.shopIds.toSet()) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Edit \"${item.name}\"") },
+        text = {
+            Column {
+                if (appData.shops.isNotEmpty()) {
+                    Text("Available at:", modifier = Modifier.padding(bottom = 4.dp))
+                    ShopChipSelector(
+                        shops = appData.shops,
+                        selectedShopIds = selectedShopIds.value,
+                        onToggle = { shopId ->
+                            selectedShopIds.value = if (selectedShopIds.value.contains(shopId)) {
+                                selectedShopIds.value - shopId
+                            } else {
+                                selectedShopIds.value + shopId
+                            }
+                        }
+                    )
+                } else {
+                    Text("No shops added yet. Add shops from the Shops tab to tag this item.")
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    viewModel.updateItemShops(item.id, selectedShopIds.value.toList())
+                    onDismiss()
+                }
+            ) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
         }
     )
 }
@@ -206,23 +294,17 @@ private fun AddItemDialog(
 
                 if (appData.shops.isNotEmpty()) {
                     Text("Available at:", modifier = Modifier.padding(top = 12.dp, bottom = 4.dp))
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        appData.shops.forEach { shop ->
-                            FilterChip(
-                                selected = selectedShopIds.value.contains(shop.id),
-                                onClick = {
-                                    selectedShopIds.value = if (selectedShopIds.value.contains(shop.id)) {
-                                        selectedShopIds.value - shop.id
-                                    } else {
-                                        selectedShopIds.value + shop.id
-                                    }
-                                },
-                                label = { Text(shop.name) }
-                            )
+                    ShopChipSelector(
+                        shops = appData.shops,
+                        selectedShopIds = selectedShopIds.value,
+                        onToggle = { shopId ->
+                            selectedShopIds.value = if (selectedShopIds.value.contains(shopId)) {
+                                selectedShopIds.value - shopId
+                            } else {
+                                selectedShopIds.value + shopId
+                            }
                         }
-                    }
+                    )
                 } else {
                     Text(
                         "No shops added yet. Add shops from the Shops tab to filter your list by store.",

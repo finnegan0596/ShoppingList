@@ -85,7 +85,7 @@ fun SettingsScreen(viewModel: ShoppingListViewModel) {
         }
 
         OutlinedButton(
-            onClick = { importLauncher.launch("application/json") },
+            onClick = { importLauncher.launch("*/*") },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Import shopping list")
