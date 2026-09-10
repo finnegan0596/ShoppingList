@@ -1,0 +1,46 @@
+name: Build APK and Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Determine version
+        id: version
+        run: echo "name=v$(date +'%Y.%m.%d')-${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+
+      - name: Rename APK
+        run: cp app/build/outputs/apk/debug/app-debug.apk ShoppingList-${{ steps.version.outputs.name }}.apk
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.name }}
+          name: ShoppingList ${{ steps.version.outputs.name }}
+          body: |
+            Automated build from commit ${{ github.sha }}.
+
+            Download the APK below and install it on your Android device (you may need to allow installing apps from unknown sources / this browser).
+          files: ShoppingList-${{ steps.version.outputs.name }}.apk
