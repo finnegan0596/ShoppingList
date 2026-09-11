@@ -12,7 +12,7 @@
 
     <!-- Trolley stroke from user-provided path, cream stroke on navy -->
     <path
-            android:fillColor="none"
+            android:fillColor="@android:color/transparent"
             android:strokeColor="#EEDEC5"
             android:strokeWidth="8"
             android:strokeLineCap="round"
