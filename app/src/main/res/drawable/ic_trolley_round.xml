@@ -10,12 +10,11 @@
             android:fillColor="#001E3C"
             android:pathData="M54,0 A54,54 0 1,0 54,108 A54,54 0 1,0 54,0 Z"/>
 
-    <!-- Cream trolley centered -->
-    <path
-            android:fillColor="#FFF8E1"
-            android:strokeColor="#001E3C"
-            android:strokeWidth="1"
-            android:strokeLineJoin="round"
-            android:pathData="M22,18h30l16,56c0.8,2.4,2.6,4,5.3,4h40c2.7,0,4.5-1.6,5.3-4L118,64H64L53,28H22z M42,86c-3.3,0-6,2.7-6,6s2.7,6,6,6 6-2.7,6-6S45.3,86,42,86z M94,86c-3.3,0-6,2.7-6,6s2.7,6,6,6 6-2.7,6-6S97.3,86,94,86z"/>
+    <!-- Minimalist cream trolley centered -->
+    <rect android:x="18" android:y="24" android:width="48" android:height="28" android:rx="4" android:ry="4" android:fillColor="#FFF8E1" android:strokeColor="#001E3C" android:strokeWidth="1.6"/>
+    <path android:fillColor="#FFF8E1" android:strokeColor="#001E3C" android:strokeWidth="2" android:strokeLineCap="round" android:pathData="M22,24 L12,12 L36,12"/>
+    <circle android:cx="30" android:cy="80" android:r="6" android:fillColor="#FFF8E1" android:strokeColor="#001E3C" android:strokeWidth="1.6"/>
+    <circle android:cx="70" android:cy="80" android:r="6" android:fillColor="#FFF8E1" android:strokeColor="#001E3C" android:strokeWidth="1.6"/>
+    <rect android:x="78" android:y="40" android:width="4" android:height="18" android:fillColor="#FFF8E1"/>
 
 </vector>

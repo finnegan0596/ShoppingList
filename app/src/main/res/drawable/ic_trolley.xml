@@ -5,17 +5,16 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Navy circular background -->
+        <!-- Navy circular background -->
     <path
             android:fillColor="#001E3C"
             android:pathData="M54,0 A54,54 0 1,0 54,108 A54,54 0 1,0 54,0 Z"/>
 
-    <!-- Cream trolley -->
-    <path
-            android:fillColor="#FFF8E1"
-            android:strokeColor="#001E3C"
-            android:strokeWidth="1"
-            android:strokeLineJoin="round"
-            android:pathData="M18,12h24l15,56c0.7,2.4,2.6,4,5.2,4h46c2.6,0,4.6-1.6,5.2-4L118,58H58L49,24H18z M38,86c-3.3,0-6,2.7-6,6s2.7,6,6,6  6-2.7,6-6S41.3,86,38,86z M90,86c-3.3,0-6,2.7-6,6s2.7,6,6,6 6-2.7,6-6S93.3,86,90,86z"/>
+        <!-- Minimalist cream trolley -->
+        <rect android:x="18" android:y="22" android:width="48" android:height="30" android:rx="4" android:ry="4" android:fillColor="#FFF8E1" android:strokeColor="#001E3C" android:strokeWidth="1.6"/>
+        <path android:fillColor="#FFF8E1" android:strokeColor="#001E3C" android:strokeWidth="2" android:strokeLineCap="round" android:pathData="M22,22 L12,10 L36,10"/>
+        <circle android:cx="30" android:cy="80" android:r="6" android:fillColor="#FFF8E1" android:strokeColor="#001E3C" android:strokeWidth="1.6"/>
+        <circle android:cx="70" android:cy="80" android:r="6" android:fillColor="#FFF8E1" android:strokeColor="#001E3C" android:strokeWidth="1.6"/>
+        <rect android:x="78" android:y="40" android:width="4" android:height="20" android:fillColor="#FFF8E1"/>
 
 </vector>
