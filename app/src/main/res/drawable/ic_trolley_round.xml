@@ -10,11 +10,15 @@
             android:fillColor="#001E3C"
             android:pathData="M54,0 A54,54 0 1,0 54,108 A54,54 0 1,0 54,0 Z"/>
 
-    <!-- Minimalist cream trolley centered -->
-    <rect android:x="18" android:y="24" android:width="48" android:height="28" android:rx="4" android:ry="4" android:fillColor="#FFF8E1" android:strokeColor="#001E3C" android:strokeWidth="1.6"/>
-    <path android:fillColor="#FFF8E1" android:strokeColor="#001E3C" android:strokeWidth="2" android:strokeLineCap="round" android:pathData="M22,24 L12,12 L36,12"/>
-    <circle android:cx="30" android:cy="80" android:r="6" android:fillColor="#FFF8E1" android:strokeColor="#001E3C" android:strokeWidth="1.6"/>
-    <circle android:cx="70" android:cy="80" android:r="6" android:fillColor="#FFF8E1" android:strokeColor="#001E3C" android:strokeWidth="1.6"/>
-    <rect android:x="78" android:y="40" android:width="4" android:height="18" android:fillColor="#FFF8E1"/>
+    <!-- Trolley stroke from user-provided path, cream stroke on navy -->
+    <path
+            android:fillColor="none"
+            android:strokeColor="#EEDEC5"
+            android:strokeWidth="8"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M6.29977 5 H21 L19 12 H7.37671 M20 16 H8 L6 3 H3 M9 20 C9 20.5523 8.55228 21 8 21 C7.44772 21 7 20.5523 7 20 C7 19.4477 7.44772 19 8 19 C8.55228 19 9 19.4477 9 20 Z M20 20 C20 20.5523 19.5523 21 19 21 C18.4477 21 18 20.5523 18 20 C18 19.4477 18.4477 19 19 19 C19.5523 19 20 19.4477 20 20 Z"
+            android:viewportWidth="24"
+            android:viewportHeight="24"/>
 
 </vector>
