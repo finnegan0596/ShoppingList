@@ -22,4 +22,14 @@ class CreateListMessagesTest {
             createListErrorMessage(throwable)
         )
     }
+
+    @Test
+    fun `create error message includes exception message when available`() {
+        val throwable = RuntimeException("backend rejected request")
+
+        assertEquals(
+            "Could not create list: backend rejected request",
+            createListErrorMessage(throwable)
+        )
+    }
 }
