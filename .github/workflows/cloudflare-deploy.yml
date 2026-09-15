@@ -31,7 +31,7 @@ jobs:
           node-version: '20'
 
       - name: Install Wrangler
-        run: npm install --no-save wrangler
+        run: npm install --no-save wrangler@latest
 
       - name: Validate production config on PR
         if: ${{ github.event_name == 'pull_request' }}

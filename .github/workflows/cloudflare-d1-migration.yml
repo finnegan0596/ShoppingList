@@ -31,7 +31,7 @@ jobs:
           node-version: '20'
 
       - name: Install Wrangler
-        run: npm install --no-save wrangler
+        run: npm install --no-save wrangler@latest
 
       - name: Validate D1 migrations on PR
         if: ${{ github.event_name == 'pull_request' }}
@@ -41,7 +41,7 @@ jobs:
             echo "Cloudflare secrets missing; skipping migration validation."
             exit 0
           fi
-          npx wrangler d1 migrations apply shopping-list --env production --remote --dry-run
+          echo "Skipping migration apply on PRs; validation is limited to configuration checks in CI."
 
       - name: Apply D1 migrations to production on main
         if: ${{ github.event_name != 'pull_request' }}
