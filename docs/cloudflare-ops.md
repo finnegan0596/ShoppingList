@@ -3,7 +3,7 @@
 ## Default guardrails
 
 - Rate limit: 60 requests per minute per client IP for the public API.
-- Monthly spend threshold: $10 USD.
+- Monthly spend threshold: $1 USD.
 - Review owner: assign a single maintainer in the repo or issue tracker.
 - Review cadence: first business day of each month.
 
