@@ -1,0 +1,23 @@
+name = "shopping-list-api"
+main = "src/worker.js"
+compatibility_date = "2025-01-01"
+
+[vars]
+APP_NAME = "ShoppingList"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "shopping-list"
+database_id = "95f5bc0e-d541-4c5f-851b-ba867a397cfb"
+
+[env.production]
+name = "shopping-list-api"
+workers_dev = true
+
+[env.production.vars]
+APP_NAME = "ShoppingList"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "shopping-list"
+database_id = "95f5bc0e-d541-4c5f-851b-ba867a397cfb"
