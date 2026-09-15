@@ -101,7 +101,7 @@ fun SettingsScreen(viewModel: ShoppingListViewModel) {
         }
 
         OutlinedButton(
-            onClick = { viewModel.createRemoteList(guid = sharedGuid.ifBlank { null }, name = sharedListName.ifBlank { null }) },
+            onClick = { viewModel.createRemoteList(name = sharedListName.ifBlank { null }) },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Create shared list")

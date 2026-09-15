@@ -126,10 +126,7 @@ async function createList(request, env) {
     return error('Request body must be an object', 400);
   }
 
-  const guid = body.guid ?? crypto.randomUUID();
-  if (typeof guid !== 'string' || !isGuid(guid)) {
-    return error('guid must contain only letters, numbers, "_" or "-"', 400);
-  }
+  const guid = crypto.randomUUID();
   if (body.name !== undefined && body.name !== null && typeof body.name !== 'string') {
     return error('name must be a string or null', 400);
   }

@@ -53,10 +53,10 @@ class ShoppingListViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    fun createRemoteList(guid: String? = null, name: String? = null) {
+    fun createRemoteList(name: String? = null) {
         viewModelScope.launch {
             try {
-                val remoteList = repository.createRemoteList(guid, name)
+                val remoteList = repository.createRemoteList(name)
                 _activeListGuid.value = remoteList.guid
                 _remoteRevision.value = remoteList.revision
                 _message.value = "Created shared list ${remoteList.guid}"

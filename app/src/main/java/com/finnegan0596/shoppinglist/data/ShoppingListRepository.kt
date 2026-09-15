@@ -112,9 +112,8 @@ class ShoppingListRepository(private val context: Context) {
         return remoteList
     }
 
-    fun createRemoteList(guid: String? = null, name: String? = null): RemoteListState {
+    fun createRemoteList(name: String? = null): RemoteListState {
         val body = buildJsonObject {
-            if (!guid.isNullOrBlank()) put("guid", guid)
             if (!name.isNullOrBlank()) put("name", name)
         }.toString()
 
