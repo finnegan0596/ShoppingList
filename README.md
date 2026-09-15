@@ -53,3 +53,20 @@ Since this is a personal/offline app, releases use a debug-signed APK rather
 than a dedicated release signing key. If you later want a properly signed
 release build, add a keystore and wire it up as GitHub Actions secrets, then
 switch the workflow to run `assembleRelease`.
+
+## D1 schema migrations
+
+The GUID-based shared-list schema lives in `migrations/`. Install Wrangler
+and configure a D1 database binding before applying migrations:
+
+```sh
+npx wrangler d1 migrations apply shopping-list --local
+npx wrangler d1 migrations apply shopping-list --remote
+```
+
+The `--local` command applies migrations to Wrangler's local development
+database. Use `--remote` only after reviewing the migration and backing up
+production data. `migrations/rollback/0001_initial_schema.sql` is a manual,
+destructive rollback; apply it only after exporting the database and stopping
+writers. Keep rollback files outside the migration root so Wrangler does not
+apply them as forward migrations.
