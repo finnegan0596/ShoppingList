@@ -3,11 +3,16 @@ package com.finnegan0596.shoppinglist.data
 import android.content.Context
 import android.net.Uri
 import androidx.core.content.FileProvider
+import com.finnegan0596.shoppinglist.BuildConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import java.io.File
+import java.net.HttpURLConnection
+import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -15,10 +20,15 @@ import java.util.UUID
 
 /**
  * Persists [AppData] as a single human-readable JSON file in the app's private
- * storage. No SQL database and no network/server of any kind is involved -
- * everything lives in one text file that can also be shared/exported as-is.
+ * storage. It also supports optional loading and syncing with the shared-list
+ * Worker API when a GUID-backed route is opened.
  */
 class ShoppingListRepository(private val context: Context) {
+
+    companion object {
+        @Volatile
+        var remoteApiBaseUrl: String = BuildConfig.REMOTE_API_BASE_URL
+    }
 
     private val json = Json {
         prettyPrint = true
@@ -47,6 +57,100 @@ class ShoppingListRepository(private val context: Context) {
     private fun persist(newData: AppData) {
         _data.value = newData
         storageFile.writeText(json.encodeToString(AppData.serializer(), newData))
+    }
+
+    private fun remoteListToAppData(remoteList: RemoteListState): AppData {
+        return AppData(
+            shops = emptyList(),
+            items = remoteList.items.map { item ->
+                Item(
+                    id = item.id.toString(),
+                    name = item.text,
+                    shopIds = emptyList(),
+                    inCart = true,
+                    purchased = item.checked
+                )
+            }
+        )
+    }
+
+    private fun requestJson(method: String, path: String, body: String? = null): String {
+        val url = URL("${remoteApiBaseUrl.trimEnd('/')}$path")
+        val connection = url.openConnection() as HttpURLConnection
+        connection.requestMethod = method
+        connection.connectTimeout = 10000
+        connection.readTimeout = 10000
+        connection.setRequestProperty("Accept", "application/json")
+        connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
+
+        if (body != null) {
+            connection.doOutput = true
+            connection.outputStream.use { stream ->
+                stream.write(body.toByteArray(Charsets.UTF_8))
+            }
+        }
+
+        val responseCode = connection.responseCode
+        val payload = if (responseCode in 200..299) {
+            connection.inputStream?.bufferedReader()?.use { it.readText() }
+        } else {
+            connection.errorStream?.bufferedReader()?.use { it.readText() }
+        }
+        connection.disconnect()
+
+        if (responseCode !in 200..299) {
+            throw IllegalStateException(payload ?: "Remote request failed: $responseCode")
+        }
+
+        return payload ?: "{}"
+    }
+
+    fun openRemoteList(guid: String): RemoteListState {
+        val payload = requestJson("GET", "/api/lists/$guid")
+        val remoteList = json.decodeFromString(RemoteListState.serializer(), payload)
+        persist(remoteListToAppData(remoteList))
+        return remoteList
+    }
+
+    fun createRemoteList(guid: String? = null, name: String? = null): RemoteListState {
+        val body = buildJsonObject {
+            if (!guid.isNullOrBlank()) put("guid", guid)
+            if (!name.isNullOrBlank()) put("name", name)
+        }.toString()
+
+        val payload = requestJson("POST", "/api/lists", body)
+        val remoteList = json.decodeFromString(RemoteListState.serializer(), payload)
+        persist(remoteListToAppData(remoteList))
+        return remoteList
+    }
+
+    fun addRemoteItem(guid: String, name: String, revision: Int): RemoteListState {
+        val body = buildJsonObject {
+            put("text", name.trim())
+            put("qty", null)
+            put("checked", false)
+            put("sortOrder", 0)
+            put("revision", revision)
+        }.toString()
+        val payload = requestJson("POST", "/api/lists/$guid/items", body)
+        return json.decodeFromString(RemoteListState.serializer(), payload)
+    }
+
+    fun updateRemoteItem(guid: String, itemId: Int, revision: Int, checked: Boolean): RemoteListState {
+        val body = buildJsonObject {
+            put("checked", checked)
+            put("revision", revision)
+        }.toString()
+        val payload = requestJson("PATCH", "/api/lists/$guid/items/$itemId", body)
+        return json.decodeFromString(RemoteListState.serializer(), payload)
+    }
+
+    fun deleteRemoteItem(guid: String, itemId: Int, revision: Int): RemoteListState {
+        val body = buildJsonObject {
+            put("revision", revision)
+        }.toString()
+        val payload = requestJson("DELETE", "/api/lists/$guid/items/$itemId", body)
+        return json.decodeFromString(RemoteListState.serializer(), payload)
     }
 
     // ----- Shops -----

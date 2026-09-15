@@ -37,3 +37,23 @@ data class AppData(
     val shops: List<Shop> = emptyList(),
     val items: List<Item> = emptyList()
 )
+
+@Serializable
+data class RemoteListItem(
+    val id: Int,
+    val text: String,
+    val qty: String? = null,
+    val checked: Boolean = false,
+    val sortOrder: Int = 0,
+    val updatedAt: String? = null
+)
+
+@Serializable
+data class RemoteListState(
+    val guid: String,
+    val name: String? = null,
+    val revision: Int = 0,
+    val createdAt: String? = null,
+    val updatedAt: String? = null,
+    val items: List<RemoteListItem> = emptyList()
+)

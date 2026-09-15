@@ -15,14 +15,17 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.finnegan0596.shoppinglist.ui.ShoppingListViewModel
 import com.finnegan0596.shoppinglist.ui.screens.SettingsScreen
 import com.finnegan0596.shoppinglist.ui.screens.ShopsScreen
@@ -44,9 +47,11 @@ class MainActivity : ComponentActivity() {
 }
 
 private sealed class Destination(val route: String, val label: String) {
-    data object List : Destination("list", "List")
+    data object List : Destination("list/{guid}", "List")
     data object Shops : Destination("shops", "Shops")
     data object Settings : Destination("settings", "Data")
+
+    fun routeWithGuid(guid: String = "local"): String = "list/$guid"
 }
 
 @Composable
@@ -61,9 +66,10 @@ fun ShoppingListApp(viewModel: ShoppingListViewModel) {
                 val currentDestination = backStackEntry?.destination
                 destinations.forEach { destination ->
                     NavigationBarItem(
-                        selected = currentDestination?.hierarchy?.any { it.route == destination.route } == true,
+                        selected = currentDestination?.hierarchy?.any { it.route == destination.route || it.route == destination.routeWithGuid() } == true,
                         onClick = {
-                            navController.navigate(destination.route) {
+                            val targetRoute = if (destination == Destination.List) destination.routeWithGuid() else destination.route
+                            navController.navigate(targetRoute) {
                                 popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                                 launchSingleTop = true
                                 restoreState = true
@@ -84,10 +90,21 @@ fun ShoppingListApp(viewModel: ShoppingListViewModel) {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Destination.List.route,
+            startDestination = Destination.List.routeWithGuid(),
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(Destination.List.route) { ShoppingListScreen(viewModel) }
+            composable(
+                route = Destination.List.route,
+                arguments = listOf(navArgument("guid") { type = NavType.StringType; defaultValue = "local" })
+            ) { backStackEntry ->
+                val guid = backStackEntry.arguments?.getString("guid") ?: "local"
+                LaunchedEffect(guid) {
+                    if (guid != "local") {
+                        viewModel.openRemoteList(guid)
+                    }
+                }
+                ShoppingListScreen(viewModel)
+            }
             composable(Destination.Shops.route) { ShopsScreen(viewModel) }
             composable(Destination.Settings.route) { SettingsScreen(viewModel) }
         }
