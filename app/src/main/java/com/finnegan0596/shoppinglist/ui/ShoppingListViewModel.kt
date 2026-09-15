@@ -11,6 +11,7 @@ import com.finnegan0596.shoppinglist.data.ShoppingListRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -65,6 +66,7 @@ class ShoppingListViewModel(application: Application) : AndroidViewModel(applica
                 _remoteRevision.value = remoteList.revision
                 _message.value = createListSuccessMessage(remoteList.guid)
             } catch (e: Exception) {
+                if (e is CancellationException) throw e
                 _message.value = createListErrorMessage(e)
             }
         }
