@@ -1,0 +1,14 @@
+{
+  "name": "shopping-list-cloudflare",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy:preview": "wrangler deploy --env preview",
+    "deploy:prod": "wrangler deploy --env production",
+    "migrate:local": "wrangler d1 migrations apply shopping-list --local",
+    "migrate:remote": "wrangler d1 migrations apply shopping-list --remote"
+  },
+  "devDependencies": {
+    "wrangler": "^3.108.0"
+  }
+}

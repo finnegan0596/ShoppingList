@@ -1,0 +1,53 @@
+name = "shopping-list-api"
+main = "src/worker.js"
+compatibility_date = "2025-01-01"
+
+[vars]
+APP_NAME = "ShoppingList"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "shopping-list"
+database_id = "00000000-0000-0000-0000-000000000000"
+
+[[unsafe.bindings]]
+name = "LIST_RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "shopping-list-default"
+simple = { limit = 60, period = 60 }
+
+[env.preview]
+name = "shopping-list-api-preview"
+workers_dev = true
+
+[env.preview.vars]
+APP_NAME = "ShoppingList-preview"
+
+[[env.preview.d1_databases]]
+binding = "DB"
+database_name = "shopping-list-preview"
+database_id = "00000000-0000-0000-0000-000000000000"
+
+[[env.preview.unsafe.bindings]]
+name = "LIST_RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "shopping-list-preview"
+simple = { limit = 60, period = 60 }
+
+[env.production]
+name = "shopping-list-api"
+workers_dev = true
+
+[env.production.vars]
+APP_NAME = "ShoppingList"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "shopping-list"
+database_id = "00000000-0000-0000-0000-000000000000"
+
+[[env.production.unsafe.bindings]]
+name = "LIST_RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "shopping-list-production"
+simple = { limit = 60, period = 60 }
