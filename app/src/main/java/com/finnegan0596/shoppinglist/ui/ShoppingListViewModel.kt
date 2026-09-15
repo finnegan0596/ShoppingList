@@ -11,7 +11,9 @@ import com.finnegan0596.shoppinglist.data.ShoppingListRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ShoppingListViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -56,12 +58,14 @@ class ShoppingListViewModel(application: Application) : AndroidViewModel(applica
     fun createRemoteList(name: String? = null) {
         viewModelScope.launch {
             try {
-                val remoteList = repository.createRemoteList(name)
+                val remoteList = withContext(Dispatchers.IO) {
+                    repository.createRemoteList(name)
+                }
                 _activeListGuid.value = remoteList.guid
                 _remoteRevision.value = remoteList.revision
-                _message.value = "Created shared list ${remoteList.guid}"
+                _message.value = createListSuccessMessage(remoteList.guid)
             } catch (e: Exception) {
-                _message.value = "Could not create list: ${e.message}"
+                _message.value = createListErrorMessage(e)
             }
         }
     }
