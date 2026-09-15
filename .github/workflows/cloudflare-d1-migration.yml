@@ -1,11 +1,6 @@
 name: Cloudflare D1 migration
 
 on:
-  pull_request:
-    paths:
-      - 'migrations/**'
-      - 'wrangler.toml'
-      - '.github/workflows/cloudflare-d1-migration.yml'
   push:
     branches:
       - main
@@ -34,9 +29,5 @@ jobs:
       - name: Install Wrangler
         run: npm install --no-save wrangler
 
-      - name: Apply D1 migrations to preview
-        run: npx wrangler d1 migrations apply shopping-list --env preview --remote
-
       - name: Apply D1 migrations to production
-        if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
         run: npx wrangler d1 migrations apply shopping-list --env production --remote

@@ -57,9 +57,9 @@ switch the workflow to run `assembleRelease`.
 ## Cloudflare deployment and operations
 
 The repo includes a minimal Cloudflare Worker configuration for the no-auth
-shared-list backend, along with deploy and D1 migration workflows under
-[.github/workflows](.github/workflows). The default API guardrail is a rate
-limit of 60 requests per minute per client IP, and the ops checklist in
+shared-list backend, along with production deploy and D1 migration workflows
+under [.github/workflows](.github/workflows). The default API guardrail is a
+rate limit of 60 requests per minute per client IP, and the ops checklist in
 [docs/cloudflare-ops.md](docs/cloudflare-ops.md) records the monthly spend
 threshold and review owner.
 

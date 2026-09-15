@@ -17,6 +17,6 @@
 
 ## Deployment notes
 
-- Preview deploys run on pull requests and feature branches.
 - Production deploys run only on `main` after the migration workflow succeeds.
+- Preview deploys are intentionally disabled until a real preview environment and D1 database are configured.
 - Human approval is still required for repository policy and Cloudflare secret access.
