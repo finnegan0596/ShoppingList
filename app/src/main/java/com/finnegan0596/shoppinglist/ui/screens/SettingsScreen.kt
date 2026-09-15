@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -32,8 +33,15 @@ import kotlinx.coroutines.launch
 fun SettingsScreen(viewModel: ShoppingListViewModel) {
     val context = LocalContext.current
     val message by viewModel.message.collectAsState()
+    val activeGuid by viewModel.activeListGuid.collectAsState()
     val scope = rememberCoroutineScope()
     var pendingImportText by remember { mutableStateOf<String?>(null) }
+    var sharedGuid by remember { mutableStateOf(activeGuid ?: "") }
+    var sharedListName by remember { mutableStateOf("") }
+
+    LaunchedEffect(activeGuid) {
+        sharedGuid = activeGuid ?: sharedGuid
+    }
 
     val importLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -67,7 +75,37 @@ fun SettingsScreen(viewModel: ShoppingListViewModel) {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text("Your list is stored only on this device, in a single JSON file. Nothing is sent to any server.")
+        Text("Local export/import stays available. Shared lists can also be opened by GUID when the Worker API is configured.")
+
+        Text(if (activeGuid != null) "Active shared list: $activeGuid" else "No shared list is open.")
+
+        OutlinedTextField(
+            value = sharedGuid,
+            onValueChange = { sharedGuid = it },
+            label = { Text("Shared list GUID") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        OutlinedTextField(
+            value = sharedListName,
+            onValueChange = { sharedListName = it },
+            label = { Text("New list name (optional)") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Button(
+            onClick = { viewModel.openRemoteList(sharedGuid) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Open shared list")
+        }
+
+        OutlinedButton(
+            onClick = { viewModel.createRemoteList(guid = sharedGuid.ifBlank { null }, name = sharedListName.ifBlank { null }) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Create shared list")
+        }
 
         Button(
             onClick = {
