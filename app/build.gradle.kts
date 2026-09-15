@@ -15,6 +15,11 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+        buildConfigField(
+            "String",
+            "REMOTE_API_BASE_URL",
+            "\"https://shopping-list-api.martintinycart.workers.dev\""
+        )
 
         vectorDrawables {
             useSupportLibrary = true
@@ -39,6 +44,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     packaging {
         resources {

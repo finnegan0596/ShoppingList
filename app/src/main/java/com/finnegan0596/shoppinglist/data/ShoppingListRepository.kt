@@ -3,6 +3,7 @@ package com.finnegan0596.shoppinglist.data
 import android.content.Context
 import android.net.Uri
 import androidx.core.content.FileProvider
+import com.finnegan0596.shoppinglist.BuildConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,7 +27,7 @@ class ShoppingListRepository(private val context: Context) {
 
     companion object {
         @Volatile
-        var remoteApiBaseUrl: String = "http://localhost:8787"
+        var remoteApiBaseUrl: String = BuildConfig.REMOTE_API_BASE_URL
     }
 
     private val json = Json {
