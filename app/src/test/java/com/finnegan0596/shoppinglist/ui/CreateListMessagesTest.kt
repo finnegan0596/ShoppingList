@@ -52,4 +52,24 @@ class CreateListMessagesTest {
             createListErrorMessage(throwable)
         )
     }
+
+    @Test
+    fun `create error message extracts remote error field with whitespace`() {
+        val throwable = RuntimeException("""{ "error" : "List not found" }""")
+
+        assertEquals(
+            "Could not create list: List not found",
+            createListErrorMessage(throwable)
+        )
+    }
+
+    @Test
+    fun `create error message preserves escaped quotes in remote error payload`() {
+        val throwable = RuntimeException("""{"error":"bad \"name\""}""")
+
+        assertEquals(
+            "Could not create list: bad \"name\"",
+            createListErrorMessage(throwable)
+        )
+    }
 }
