@@ -162,4 +162,14 @@ class CreateListMessagesTest {
             createListErrorMessage(throwable)
         )
     }
+
+    @Test
+    fun `create error message decodes escaped quotes in primitive json payload`() {
+        val throwable = RuntimeException("\"bad \\\\\"name\\\\\"\"")
+
+        assertEquals(
+            "Could not create list: bad \"name\"",
+            createListErrorMessage(throwable)
+        )
+    }
 }
