@@ -65,7 +65,7 @@ class CreateListMessagesTest {
 
     @Test
     fun `create error message extracts remote error field with whitespace`() {
-        val throwable = RuntimeException("""{ "error" : "List not found" }""")
+        val throwable = RuntimeException("""  { "error" : "List not found" }  """)
 
         assertEquals(
             "Could not create list: List not found",
