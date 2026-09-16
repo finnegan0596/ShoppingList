@@ -142,4 +142,24 @@ class CreateListMessagesTest {
             createListErrorMessage(throwable)
         )
     }
+
+    @Test
+    fun `create error message falls back for numeric error field`() {
+        val throwable = RuntimeException("""{"error":500}""")
+
+        assertEquals(
+            "Could not create list. Check connection and try again.",
+            createListErrorMessage(throwable)
+        )
+    }
+
+    @Test
+    fun `create error message falls back for boolean error field`() {
+        val throwable = RuntimeException("""{"error":true}""")
+
+        assertEquals(
+            "Could not create list. Check connection and try again.",
+            createListErrorMessage(throwable)
+        )
+    }
 }
