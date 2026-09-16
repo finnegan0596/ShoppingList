@@ -44,6 +44,16 @@ class CreateListMessagesTest {
     }
 
     @Test
+    fun `create error message falls back when exception message is quoted null`() {
+        val throwable = RuntimeException("\"null\"")
+
+        assertEquals(
+            "Could not create list. Check connection and try again.",
+            createListErrorMessage(throwable)
+        )
+    }
+
+    @Test
     fun `create error message extracts remote error field from json payload`() {
         val throwable = RuntimeException("""{"error":"List not found"}""")
 
