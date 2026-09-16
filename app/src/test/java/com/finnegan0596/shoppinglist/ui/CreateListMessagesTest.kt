@@ -128,7 +128,7 @@ class CreateListMessagesTest {
         val throwable = RuntimeException("\"backend\\\\n down\"")
 
         assertEquals(
-            "Could not create list: backend\\n down",
+            "Could not create list: backend\n down",
             createListErrorMessage(throwable)
         )
     }
