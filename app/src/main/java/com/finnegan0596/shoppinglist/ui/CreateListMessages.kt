@@ -48,5 +48,5 @@ private fun sanitizeErrorDetail(detail: String): String? {
 private fun decodeQuotedJsonString(message: String): String? {
     if (!(message.startsWith("\"") && message.endsWith("\""))) return null
     val parsed = runCatching { Json.parseToJsonElement(message) }.getOrNull() as? JsonPrimitive ?: return null
-    return parsed.contentOrNull
+    return parsed.takeIf { it.isString }?.contentOrNull
 }
