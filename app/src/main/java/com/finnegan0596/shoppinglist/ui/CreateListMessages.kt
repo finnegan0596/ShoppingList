@@ -29,7 +29,7 @@ private fun extractRemoteErrorDetail(message: String): String? {
 
 private fun sanitizeErrorDetail(detail: String): String? {
     val trimmed = detail.trim()
-    val normalized = decodeQuotedJsonString(trimmed) ?: trimmed.removeSurrounding("\"")
+    val normalized = (decodeQuotedJsonString(trimmed) ?: trimmed.removeSurrounding("\"")).trim()
     return normalized.takeUnless {
         it.isEmpty() || it.equals("null", ignoreCase = true) || it == "{}"
     }

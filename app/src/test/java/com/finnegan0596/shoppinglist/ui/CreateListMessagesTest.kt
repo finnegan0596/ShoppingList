@@ -132,4 +132,14 @@ class CreateListMessagesTest {
             createListErrorMessage(throwable)
         )
     }
+
+    @Test
+    fun `create error message falls back for quoted null with whitespace`() {
+        val throwable = RuntimeException("\" null \"")
+
+        assertEquals(
+            "Could not create list. Check connection and try again.",
+            createListErrorMessage(throwable)
+        )
+    }
 }
