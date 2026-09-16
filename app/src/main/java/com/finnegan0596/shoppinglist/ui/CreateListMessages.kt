@@ -21,11 +21,8 @@ internal fun createListErrorMessage(throwable: Throwable): String {
 private fun extractRemoteErrorDetail(message: String): String? {
     val trimmed = message.trim()
     val parsed = runCatching { Json.parseToJsonElement(trimmed) }.getOrNull() ?: return trimmed
-    return when (parsed) {
-        is JsonObject -> (parsed["error"] as? JsonPrimitive)?.takeIf { it.isString }?.contentOrNull
-        is JsonPrimitive -> parsed.takeIf { it.isString }?.contentOrNull
-        else -> null
-    }
+    if (parsed !is JsonObject) return trimmed
+    return (parsed["error"] as? JsonPrimitive)?.takeIf { it.isString }?.contentOrNull
 }
 
 private fun sanitizeErrorDetail(detail: String): String? {
