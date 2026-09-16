@@ -34,7 +34,7 @@ private fun sanitizeErrorDetail(detail: String): String? {
         decoded != null -> decoded.trim()
         trimmed.startsWith("\"") && trimmed.endsWith("\"") -> {
             val inner = trimmed.removeSurrounding("\"").trim()
-            if (inner.startsWith("{") || inner.startsWith("[") || inner.endsWith("}") || inner.endsWith("]")) return null
+            if (inner in setOf("{", "[", "}", "]")) return null
             inner
         }
         else -> trimmed
