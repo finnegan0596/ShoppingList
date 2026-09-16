@@ -112,4 +112,14 @@ class CreateListMessagesTest {
             createListErrorMessage(throwable)
         )
     }
+
+    @Test
+    fun `create error message unwraps primitive json string payload`() {
+        val throwable = RuntimeException("\"backend down\"")
+
+        assertEquals(
+            "Could not create list: backend down",
+            createListErrorMessage(throwable)
+        )
+    }
 }
