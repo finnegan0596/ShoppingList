@@ -1,7 +1,6 @@
 # ShoppingList
 
-A simple, offline-first Android shopping list app. There is no server and no
-account required &mdash; everything is stored locally on your device.
+A simple, no-auth shopping list app.
 
 ## Features
 
@@ -14,12 +13,10 @@ account required &mdash; everything is stored locally on your device.
   to just the items tagged for that shop.
 - **Check items off** as you buy them, and clear purchased items when you're
   done.
-- **Export / Import.** Your list is stored as a single, human-readable JSON
+- **Export / Import.** Export a human-readable JSON
   file. Use the Data tab to share it (e.g. via Bluetooth, email, messaging
   apps) so someone else can import it, or to back it up. Import can either
   merge with or replace your current list.
-- **No SQL database, no server.** Data lives in one plain-text JSON file in
-  the app's private storage.
 
 ## Project structure
 
@@ -49,7 +46,7 @@ APK attached, ready to download and sideload onto an Android device. Pull
 requests and other branches are built (and unit-tested) via
 [.github/workflows/ci.yml](.github/workflows/ci.yml) without creating a release.
 
-Since this is a personal/offline app, releases use a debug-signed APK rather
+Releases currently use a debug-signed APK rather
 than a dedicated release signing key. If you later want a properly signed
 release build, add a keystore and wire it up as GitHub Actions secrets, then
 switch the workflow to run `assembleRelease`.
@@ -58,10 +55,7 @@ switch the workflow to run `assembleRelease`.
 
 The repo includes a minimal Cloudflare Worker configuration for the no-auth
 shared-list backend, along with production deploy and D1 migration workflows
-under [.github/workflows](.github/workflows). The default API guardrail is a
-rate limit of 60 requests per minute per client IP, and the ops checklist in
-[docs/cloudflare-ops.md](docs/cloudflare-ops.md) records the monthly spend
-threshold and review owner.
+under [.github/workflows](.github/workflows). 
 
 ## D1 schema migrations
 
