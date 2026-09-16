@@ -194,6 +194,16 @@ class CreateListMessagesTest {
     }
 
     @Test
+    fun `create error message falls back for quoted empty array payload`() {
+        val throwable = RuntimeException("\"[]\"")
+
+        assertEquals(
+            "Could not create list. Check connection and try again.",
+            createListErrorMessage(throwable)
+        )
+    }
+
+    @Test
     fun `create error message falls back for malformed quoted closing json delimiter`() {
         val throwable = RuntimeException("\"}\"")
 

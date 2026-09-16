@@ -40,7 +40,7 @@ private fun sanitizeErrorDetail(detail: String): String? {
         else -> trimmed
     }
     return normalized.takeUnless {
-        it.isEmpty() || it.equals("null", ignoreCase = true) || it == "{}"
+        it.isEmpty() || it.equals("null", ignoreCase = true) || it == "{}" || it == "[]"
     }
 }
 
