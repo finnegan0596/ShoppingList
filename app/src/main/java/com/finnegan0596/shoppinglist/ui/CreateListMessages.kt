@@ -1,8 +1,8 @@
 package com.finnegan0596.shoppinglist.ui
 
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
 internal fun createListSuccessMessage(guid: String): String = "Created shared list $guid"
@@ -20,13 +20,12 @@ internal fun createListErrorMessage(throwable: Throwable): String {
     }
 }
 
-private fun extractRemoteErrorDetail(message: String): String {
-    return runCatching {
-        Json.parseToJsonElement(message)
-            .jsonObject["error"]
-            ?.jsonPrimitive
-            ?.contentOrNull
-            ?.trim()
-            ?.takeUnless { it.isEmpty() || it.equals("null", ignoreCase = true) }
-    }.getOrNull() ?: message
+private fun extractRemoteErrorDetail(message: String): String? {
+    val parsed = runCatching { Json.parseToJsonElement(message) }.getOrNull() ?: return message
+    val parsedObject = parsed as? JsonObject ?: return null
+    return parsedObject["error"]
+        ?.jsonPrimitive
+        ?.contentOrNull
+        ?.trim()
+        ?.takeUnless { it.isEmpty() || it.equals("null", ignoreCase = true) }
 }

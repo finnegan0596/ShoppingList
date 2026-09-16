@@ -72,4 +72,24 @@ class CreateListMessagesTest {
             createListErrorMessage(throwable)
         )
     }
+
+    @Test
+    fun `create error message falls back when json payload has no error field`() {
+        val throwable = RuntimeException("""{"message":"unknown"}""")
+
+        assertEquals(
+            "Could not create list. Check connection and try again.",
+            createListErrorMessage(throwable)
+        )
+    }
+
+    @Test
+    fun `create error message falls back when payload is json array`() {
+        val throwable = RuntimeException("""["unexpected"]""")
+
+        assertEquals(
+            "Could not create list. Check connection and try again.",
+            createListErrorMessage(throwable)
+        )
+    }
 }
