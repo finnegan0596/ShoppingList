@@ -182,4 +182,14 @@ class CreateListMessagesTest {
             createListErrorMessage(throwable)
         )
     }
+
+    @Test
+    fun `create error message falls back for malformed quoted array payload`() {
+        val throwable = RuntimeException("\"[\"")
+
+        assertEquals(
+            "Could not create list. Check connection and try again.",
+            createListErrorMessage(throwable)
+        )
+    }
 }
