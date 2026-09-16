@@ -102,4 +102,14 @@ class CreateListMessagesTest {
             createListErrorMessage(throwable)
         )
     }
+
+    @Test
+    fun `create error message falls back when error field is nested object`() {
+        val throwable = RuntimeException("""{"error":{"message":"nested"}}""")
+
+        assertEquals(
+            "Could not create list. Check connection and try again.",
+            createListErrorMessage(throwable)
+        )
+    }
 }

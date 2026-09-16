@@ -4,7 +4,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.jsonPrimitive
 
 internal fun createListSuccessMessage(guid: String): String = "Created shared list $guid"
 
@@ -22,7 +21,7 @@ internal fun createListErrorMessage(throwable: Throwable): String {
 private fun extractRemoteErrorDetail(message: String): String? {
     val parsed = runCatching { Json.parseToJsonElement(message) }.getOrNull() ?: return message
     return when (parsed) {
-        is JsonObject -> parsed["error"]?.jsonPrimitive?.contentOrNull
+        is JsonObject -> (parsed["error"] as? JsonPrimitive)?.contentOrNull
         is JsonPrimitive -> parsed.contentOrNull
         else -> null
     }
