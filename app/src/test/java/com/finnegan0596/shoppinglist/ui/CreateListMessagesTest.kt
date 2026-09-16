@@ -54,6 +54,16 @@ class CreateListMessagesTest {
     }
 
     @Test
+    fun `create error message falls back when exception message is mixed-case null`() {
+        val throwable = RuntimeException("NuLl")
+
+        assertEquals(
+            "Could not create list. Check connection and try again.",
+            createListErrorMessage(throwable)
+        )
+    }
+
+    @Test
     fun `create error message falls back when exception message is quoted null`() {
         val throwable = RuntimeException("\"null\"")
 
