@@ -32,7 +32,11 @@ private fun sanitizeErrorDetail(detail: String): String? {
     val decoded = decodeQuotedJsonString(trimmed)
     val normalized = when {
         decoded != null -> decoded.trim()
-        trimmed.startsWith("\"") && trimmed.endsWith("\"") -> return null
+        trimmed.startsWith("\"") && trimmed.endsWith("\"") -> {
+            val inner = trimmed.removeSurrounding("\"").trim()
+            if (inner.startsWith("{") || inner.startsWith("[")) return null
+            inner
+        }
         else -> trimmed
     }
     return normalized.takeUnless {
