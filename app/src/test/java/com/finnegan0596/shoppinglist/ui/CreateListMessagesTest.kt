@@ -24,6 +24,16 @@ class CreateListMessagesTest {
     }
 
     @Test
+    fun `create error message falls back when exception message is whitespace`() {
+        val throwable = RuntimeException("   ")
+
+        assertEquals(
+            "Could not create list. Check connection and try again.",
+            createListErrorMessage(throwable)
+        )
+    }
+
+    @Test
     fun `create error message includes exception message when available`() {
         val throwable = RuntimeException("backend rejected request")
 
