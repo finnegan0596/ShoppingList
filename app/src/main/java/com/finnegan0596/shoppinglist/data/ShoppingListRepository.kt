@@ -4,9 +4,11 @@ import android.content.Context
 import android.net.Uri
 import androidx.core.content.FileProvider
 import com.finnegan0596.shoppinglist.BuildConfig
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -74,6 +76,16 @@ class ShoppingListRepository(private val context: Context) {
         )
     }
 
+    /** Persists remote state locally so the UI StateFlow reflects server mutations. */
+    private fun persistRemoteList(remoteList: RemoteListState) {
+        persist(remoteListToAppData(remoteList))
+    }
+
+    /**
+     * Blocking HTTP call. Must only be invoked from a background dispatcher — see the
+     * `withContext(Dispatchers.IO)` wrappers on the public remote API below. Calling it on the
+     * main thread throws [android.os.NetworkOnMainThreadException].
+     */
     private fun requestJson(method: String, path: String, body: String? = null): String {
         val url = URL("${remoteApiBaseUrl.trimEnd('/')}$path")
         val connection = url.openConnection() as HttpURLConnection
@@ -105,52 +117,61 @@ class ShoppingListRepository(private val context: Context) {
         return payload ?: "{}"
     }
 
-    fun openRemoteList(guid: String): RemoteListState {
+    suspend fun openRemoteList(guid: String): RemoteListState = withContext(Dispatchers.IO) {
         val payload = requestJson("GET", "/api/lists/$guid")
         val remoteList = json.decodeFromString(RemoteListState.serializer(), payload)
-        persist(remoteListToAppData(remoteList))
-        return remoteList
+        persistRemoteList(remoteList)
+        remoteList
     }
 
-    fun createRemoteList(name: String? = null): RemoteListState {
+    suspend fun createRemoteList(name: String? = null): RemoteListState = withContext(Dispatchers.IO) {
         val body = buildJsonObject {
             if (!name.isNullOrBlank()) put("name", name)
         }.toString()
 
         val payload = requestJson("POST", "/api/lists", body)
         val remoteList = json.decodeFromString(RemoteListState.serializer(), payload)
-        persist(remoteListToAppData(remoteList))
-        return remoteList
+        persistRemoteList(remoteList)
+        remoteList
     }
 
-    fun addRemoteItem(guid: String, name: String, revision: Int): RemoteListState {
-        val body = buildJsonObject {
-            put("text", name.trim())
-            put("qty", null)
-            put("checked", false)
-            put("sortOrder", 0)
-            put("revision", revision)
-        }.toString()
-        val payload = requestJson("POST", "/api/lists/$guid/items", body)
-        return json.decodeFromString(RemoteListState.serializer(), payload)
-    }
+    suspend fun addRemoteItem(guid: String, name: String, revision: Int): RemoteListState =
+        withContext(Dispatchers.IO) {
+            val body = buildJsonObject {
+                put("text", name.trim())
+                put("qty", null)
+                put("checked", false)
+                put("sortOrder", 0)
+                put("revision", revision)
+            }.toString()
+            val payload = requestJson("POST", "/api/lists/$guid/items", body)
+            val remoteList = json.decodeFromString(RemoteListState.serializer(), payload)
+            persistRemoteList(remoteList)
+            remoteList
+        }
 
-    fun updateRemoteItem(guid: String, itemId: Int, revision: Int, checked: Boolean): RemoteListState {
-        val body = buildJsonObject {
-            put("checked", checked)
-            put("revision", revision)
-        }.toString()
-        val payload = requestJson("PATCH", "/api/lists/$guid/items/$itemId", body)
-        return json.decodeFromString(RemoteListState.serializer(), payload)
-    }
+    suspend fun updateRemoteItem(guid: String, itemId: Int, revision: Int, checked: Boolean): RemoteListState =
+        withContext(Dispatchers.IO) {
+            val body = buildJsonObject {
+                put("checked", checked)
+                put("revision", revision)
+            }.toString()
+            val payload = requestJson("PATCH", "/api/lists/$guid/items/$itemId", body)
+            val remoteList = json.decodeFromString(RemoteListState.serializer(), payload)
+            persistRemoteList(remoteList)
+            remoteList
+        }
 
-    fun deleteRemoteItem(guid: String, itemId: Int, revision: Int): RemoteListState {
-        val body = buildJsonObject {
-            put("revision", revision)
-        }.toString()
-        val payload = requestJson("DELETE", "/api/lists/$guid/items/$itemId", body)
-        return json.decodeFromString(RemoteListState.serializer(), payload)
-    }
+    suspend fun deleteRemoteItem(guid: String, itemId: Int, revision: Int): RemoteListState =
+        withContext(Dispatchers.IO) {
+            val body = buildJsonObject {
+                put("revision", revision)
+            }.toString()
+            val payload = requestJson("DELETE", "/api/lists/$guid/items/$itemId", body)
+            val remoteList = json.decodeFromString(RemoteListState.serializer(), payload)
+            persistRemoteList(remoteList)
+            remoteList
+        }
 
     // ----- Shops -----
 

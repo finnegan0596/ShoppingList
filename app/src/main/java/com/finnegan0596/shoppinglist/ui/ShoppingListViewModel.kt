@@ -12,9 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class ShoppingListViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -50,6 +48,8 @@ class ShoppingListViewModel(application: Application) : AndroidViewModel(applica
                 _activeListGuid.value = remoteList.guid
                 _remoteRevision.value = remoteList.revision
                 _message.value = "Opened shared list ${remoteList.guid}"
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _message.value = "Could not open list: ${e.message}"
             }
@@ -59,14 +59,13 @@ class ShoppingListViewModel(application: Application) : AndroidViewModel(applica
     fun createRemoteList(name: String? = null) {
         viewModelScope.launch {
             try {
-                val remoteList = withContext(Dispatchers.IO) {
-                    repository.createRemoteList(name)
-                }
+                val remoteList = repository.createRemoteList(name)
                 _activeListGuid.value = remoteList.guid
                 _remoteRevision.value = remoteList.revision
                 _message.value = createListSuccessMessage(remoteList.guid)
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                if (e is CancellationException) throw e
                 _message.value = createListErrorMessage(e)
             }
         }
@@ -95,6 +94,8 @@ class ShoppingListViewModel(application: Application) : AndroidViewModel(applica
                     val remoteList = repository.addRemoteItem(guid, name, _remoteRevision.value ?: 0)
                     _remoteRevision.value = remoteList.revision
                     _message.value = "Synced item to shared list $guid"
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
                     _message.value = "Could not sync item: ${e.message}"
                 }
@@ -117,6 +118,8 @@ class ShoppingListViewModel(application: Application) : AndroidViewModel(applica
                     val remoteList = repository.updateRemoteItem(guid, itemIdInt, _remoteRevision.value ?: 0, purchased)
                     _remoteRevision.value = remoteList.revision
                     _message.value = "Updated shared list $guid"
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
                     _message.value = "Could not update item: ${e.message}"
                 }
@@ -135,6 +138,8 @@ class ShoppingListViewModel(application: Application) : AndroidViewModel(applica
                     val remoteList = repository.deleteRemoteItem(guid, itemIdInt, _remoteRevision.value ?: 0)
                     _remoteRevision.value = remoteList.revision
                     _message.value = "Removed item from shared list $guid"
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
                     _message.value = "Could not remove item: ${e.message}"
                 }
@@ -153,6 +158,8 @@ class ShoppingListViewModel(application: Application) : AndroidViewModel(applica
                     val remoteList = repository.deleteRemoteItem(guid, itemIdInt, _remoteRevision.value ?: 0)
                     _remoteRevision.value = remoteList.revision
                     _message.value = "Deleted item from shared list $guid"
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
                     _message.value = "Could not delete item: ${e.message}"
                 }
@@ -168,12 +175,14 @@ class ShoppingListViewModel(application: Application) : AndroidViewModel(applica
             viewModelScope.launch {
                 try {
                     val remoteList = repository.openRemoteList(guid)
+                    var revision = remoteList.revision
                     remoteList.items.filter { it.checked }.forEach { item ->
-                        repository.deleteRemoteItem(guid, item.id, _remoteRevision.value ?: 0)
+                        revision = repository.deleteRemoteItem(guid, item.id, revision).revision
                     }
-                    val refreshed = repository.openRemoteList(guid)
-                    _remoteRevision.value = refreshed.revision
+                    _remoteRevision.value = revision
                     _message.value = "Cleared purchased items in shared list $guid"
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
                     _message.value = "Could not clear purchased items: ${e.message}"
                 }
