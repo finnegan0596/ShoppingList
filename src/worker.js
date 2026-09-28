@@ -248,7 +248,7 @@ async function route(request, env) {
   if (url.pathname === '/' && request.method === 'GET') {
     return json({
       ok: true,
-      app: env.APP_NAME ?? 'ShoppingList',
+      app: env.APP_NAME ?? 'GroceryBuddy',
       message: 'API ready for list GUID endpoints.',
     });
   }

@@ -1,4 +1,4 @@
-# ShoppingList
+# GroceryBuddy
 
 A simple, no-auth shopping list app.
 

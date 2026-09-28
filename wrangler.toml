@@ -3,7 +3,7 @@ main = "src/worker.js"
 compatibility_date = "2025-01-01"
 
 [vars]
-APP_NAME = "ShoppingList"
+APP_NAME = "GroceryBuddy"
 
 [[d1_databases]]
 binding = "DB"
@@ -15,7 +15,7 @@ name = "shopping-list-api"
 workers_dev = true
 
 [env.production.vars]
-APP_NAME = "ShoppingList"
+APP_NAME = "GroceryBuddy"
 
 [[env.production.d1_databases]]
 binding = "DB"
