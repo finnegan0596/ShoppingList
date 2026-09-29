@@ -32,9 +32,10 @@ class ShoppingListViewModel(application: Application) : AndroidViewModel(applica
     private val _remoteRevision = MutableStateFlow<Int?>(null)
     val remoteRevision: StateFlow<Int?> = _remoteRevision.asStateFlow()
 
-    fun setRemoteApiBaseUrl(baseUrl: String) {
-        ShoppingListRepository.remoteApiBaseUrl = baseUrl.trimEnd('/')
-    }
+    // The remote API base URL is fixed at build time per variant (see
+    // app/build.gradle.kts): debug -> non-prod, release -> production. Point a
+    // debug build elsewhere via the `REMOTE_API_BASE_URL` Gradle property /
+    // `local.properties` / env var override instead of at runtime.
 
     fun setShopFilter(shopId: String?) {
         _selectedShopFilter.value = shopId

@@ -5,8 +5,8 @@
   "scripts": {
     "deploy:preview": "wrangler deploy --env preview",
     "deploy:prod": "wrangler deploy --env production",
-    "migrate:local": "wrangler d1 migrations apply shopping-list --local",
-    "migrate:remote": "wrangler d1 migrations apply shopping-list --remote"
+    "migrate:preview:remote": "wrangler d1 migrations apply shopping-list --env preview --remote",
+    "migrate:prod:remote": "wrangler d1 migrations apply grocerybuddy-prod --env production --remote"
   },
   "devDependencies": {
     "wrangler": "^3.108.0"
