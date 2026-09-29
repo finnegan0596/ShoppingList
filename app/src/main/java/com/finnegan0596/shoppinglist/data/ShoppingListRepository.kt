@@ -28,8 +28,12 @@ import java.util.UUID
 class ShoppingListRepository(private val context: Context) {
 
     companion object {
-        @Volatile
-        var remoteApiBaseUrl: String = BuildConfig.REMOTE_API_BASE_URL
+        /**
+         * Base URL of the shared-list Worker. Resolved per build variant at
+         * compile time (debug -> non-prod, release -> production); see
+         * app/build.gradle.kts. There is no runtime setter by design.
+         */
+        val remoteApiBaseUrl: String = BuildConfig.REMOTE_API_BASE_URL
     }
 
     private val json = Json {

@@ -37,11 +37,28 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         shell: bash
         run: |
+          set -euo pipefail
+
           if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
             echo "Cloudflare secrets missing; skipping migration validation."
             exit 0
           fi
-          echo "Skipping migration apply on PRs; validation is limited to configuration checks in CI."
+
+          # Fail closed: the preview target must never be the production D1.
+          PROD_D1_ID="ed456d44-3804-4119-b101-7aa5c403c8f5"
+
+          echo "Resolving the preview environment bindings..."
+          npx wrangler deploy --dry-run --env preview \
+            --outdir "$RUNNER_TEMP/preview-dry-run" \
+            | tee "$RUNNER_TEMP/preview-dry-run.log"
+
+          if grep -q "$PROD_D1_ID" "$RUNNER_TEMP/preview-dry-run.log"; then
+            echo "::error::Preview environment resolved to the production D1 id ($PROD_D1_ID). Failing closed."
+            exit 1
+          fi
+
+          echo "Applying pending migrations to the preview D1 (shopping-list)..."
+          npx wrangler d1 migrations apply shopping-list --env preview --remote
 
       - name: Apply D1 migrations to production on main
         if: ${{ github.event_name != 'pull_request' }}
@@ -51,4 +68,4 @@ jobs:
             echo "Cloudflare secrets missing; skipping migration."
             exit 0
           fi
-          npx wrangler d1 migrations apply shopping-list --env production --remote
+          npx wrangler d1 migrations apply grocerybuddy-prod --env production --remote

@@ -1,3 +1,15 @@
+# Environment mapping (see docs/development-environment.md and docs/cloudflare-ops.md):
+#
+#   top level / [env.preview]  -> NON-PRODUCTION (preview / debug target)
+#   [env.production]           -> PRODUCTION (release target)
+#
+# The naming is intentionally asymmetric: the legacy `shopping-list*` resources
+# are the shared non-prod environment, while `grocerybuddy-prod` is production.
+#
+# The top level mirrors `[env.preview]`, so a bare `wrangler deploy` targets the
+# non-prod Worker/D1 and can never reach production by accident. Production
+# ALWAYS requires an explicit `--env production`.
+
 name = "shopping-list-api"
 main = "src/worker.js"
 compatibility_date = "2025-01-01"
@@ -5,13 +17,30 @@ compatibility_date = "2025-01-01"
 [vars]
 APP_NAME = "GroceryBuddy"
 
+# Non-prod / preview D1 binding. Never the production id (ed456d44-...).
 [[d1_databases]]
 binding = "DB"
 database_name = "shopping-list"
 database_id = "95f5bc0e-d541-4c5f-851b-ba867a397cfb"
 
-[env.production]
+# --- Non-production / preview ------------------------------------------------
+# Mirrors the top level on purpose so bare commands stay non-prod.
+[env.preview]
 name = "shopping-list-api"
+workers_dev = true
+
+[env.preview.vars]
+APP_NAME = "GroceryBuddy"
+
+[[env.preview.d1_databases]]
+binding = "DB"
+database_name = "shopping-list"
+database_id = "95f5bc0e-d541-4c5f-851b-ba867a397cfb"
+
+# --- Production --------------------------------------------------------------
+# Requires `--env production`. Separate Worker AND separate D1 database.
+[env.production]
+name = "grocerybuddy-prod"
 workers_dev = true
 
 [env.production.vars]
@@ -19,5 +48,5 @@ APP_NAME = "GroceryBuddy"
 
 [[env.production.d1_databases]]
 binding = "DB"
-database_name = "shopping-list"
-database_id = "95f5bc0e-d541-4c5f-851b-ba867a397cfb"
+database_name = "grocerybuddy-prod"
+database_id = "ed456d44-3804-4119-b101-7aa5c403c8f5"

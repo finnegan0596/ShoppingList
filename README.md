@@ -38,18 +38,31 @@ emulator:
 
 The resulting APK is written to `app/build/outputs/apk/debug/app-debug.apk`.
 
+Debug builds talk to the **non-prod** API
+(`shopping-list-api.…workers.dev`); release builds talk to **production**
+(`grocerybuddy-prod.…workers.dev`). To point a debug build somewhere else
+without editing tracked files, pass the `REMOTE_API_BASE_URL` override:
+
+```
+./gradlew assembleDebug -PREMOTE_API_BASE_URL=http://10.0.2.2:8787
+```
+
+See [docs/development-environment.md](docs/development-environment.md) for the
+full environment map, local/preview/production loops, and seeding/resetting.
+
 ## Automated releases
 
 Every push to `main` triggers [.github/workflows/release.yml](.github/workflows/release.yml),
-which builds a debug APK and publishes it as a new GitHub Release with the
-APK attached, ready to download and sideload onto an Android device. Pull
-requests and other branches are built (and unit-tested) via
-[.github/workflows/ci.yml](.github/workflows/ci.yml) without creating a release.
+which builds a **release** APK and publishes it as a new GitHub Release with the
+APK attached, ready to download and sideload onto an Android device. The
+published APK talks to the **production** API. Pull requests and other branches
+are built (and unit-tested) via [.github/workflows/ci.yml](.github/workflows/ci.yml)
+without creating a release.
 
-Releases currently use a debug-signed APK rather
-than a dedicated release signing key. If you later want a properly signed
-release build, add a keystore and wire it up as GitHub Actions secrets, then
-switch the workflow to run `assembleRelease`.
+Release builds are currently signed with the debug signing key so the sideloaded
+APK stays installable. If you later want a properly signed release build, add a
+keystore and wire it up as GitHub Actions secrets, then drop the debug
+`signingConfig` from the `release` build type.
 
 ## Cloudflare deployment and operations
 
@@ -63,13 +76,15 @@ The GUID-based shared-list schema lives in `migrations/`. Install Wrangler
 and configure a D1 database binding before applying migrations:
 
 ```sh
-npx wrangler d1 migrations apply shopping-list --local
-npx wrangler d1 migrations apply shopping-list --remote
+# Non-prod / preview D1 (shopping-list, 95f5bc0e-…)
+npm run migrate:preview:remote
+
+# Production D1 (grocerybuddy-prod, ed456d44-…)
+npm run migrate:prod:remote
 ```
 
-The `--local` command applies migrations to Wrangler's local development
-database. Use `--remote` only after reviewing the migration and backing up
-production data. `migrations/rollback/0001_initial_schema.sql` is a manual,
-destructive rollback; apply it only after exporting the database and stopping
-writers. Keep rollback files outside the migration root so Wrangler does not
-apply them as forward migrations.
+Use the `:remote` commands only after reviewing the migration and backing up
+data — `migrate:prod:remote` targets production. `migrations/rollback/0001_initial_schema.sql`
+is a manual, destructive rollback; apply it only after exporting the database
+and stopping writers. Keep rollback files outside the migration root so
+Wrangler does not apply them as forward migrations.
