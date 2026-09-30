@@ -53,16 +53,25 @@ full environment map, local/preview/production loops, and seeding/resetting.
 ## Automated releases
 
 Every push to `main` triggers [.github/workflows/release.yml](.github/workflows/release.yml),
-which builds a **release** APK and publishes it as a new GitHub Release with the
-APK attached, ready to download and sideload onto an Android device. The
-published APK talks to the **production** API. Pull requests and other branches
-are built (and unit-tested) via [.github/workflows/ci.yml](.github/workflows/ci.yml)
-without creating a release.
+which builds two APKs and publishes them as a new GitHub Release, ready to
+download and sideload onto an Android device:
 
-Release builds are currently signed with the debug signing key so the sideloaded
-APK stays installable. If you later want a properly signed release build, add a
-keystore and wire it up as GitHub Actions secrets, then drop the debug
-`signingConfig` from the `release` build type.
+| Asset | API target |
+| --- | --- |
+| `GroceryBuddy-<version>.apk` | **production** (`grocerybuddy-prod.…workers.dev`) |
+| `GroceryBuddy-<version>-preview-debug.apk` | **non-prod / preview** (`shopping-list-api.…workers.dev`) |
+
+Pull requests and other branches are built (and unit-tested) via
+[.github/workflows/ci.yml](.github/workflows/ci.yml) without creating a release.
+
+> The preview APK is published alongside the production one as a convenience; a
+> dedicated preview build workflow would be cleaner. See issue #43.
+
+Both APKs are currently signed with the Android **debug** signing key. That key
+is generated fresh on each CI runner, so every release is effectively signed
+with a **different certificate** — which means a new release cannot be installed
+over an already-installed copy (uninstall first). A dedicated, stable release
+keystore is needed to fix this properly; tracked in issue #44.
 
 ## Cloudflare deployment and operations
 

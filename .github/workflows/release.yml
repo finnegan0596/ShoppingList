@@ -24,15 +24,19 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build release APK
-        run: ./gradlew assembleRelease --no-daemon
+      - name: Build release and preview APKs
+        run: ./gradlew assembleRelease assembleDebug --no-daemon
 
       - name: Determine version
         id: version
         run: echo "name=v$(date +'%Y.%m.%d')-${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
 
-      - name: Rename APK
-        run: cp app/build/outputs/apk/release/app-release.apk GroceryBuddy-${{ steps.version.outputs.name }}.apk
+      - name: Rename APKs
+        run: |
+          cp app/build/outputs/apk/release/app-release.apk \
+             GroceryBuddy-${{ steps.version.outputs.name }}.apk
+          cp app/build/outputs/apk/debug/app-debug.apk \
+             GroceryBuddy-${{ steps.version.outputs.name }}-preview-debug.apk
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -42,8 +46,14 @@ jobs:
           body: |
             Automated build from commit ${{ github.sha }}.
 
-            This is a **release** build and talks to the **production** API
-            (`grocerybuddy-prod.…workers.dev`).
+            Two APKs are attached — check which API each one talks to:
 
-            Download the APK below and install it on your Android device (you may need to allow installing apps from unknown sources / this browser).
-          files: GroceryBuddy-${{ steps.version.outputs.name }}.apk
+            | Asset | API target |
+            | --- | --- |
+            | `GroceryBuddy-*.apk` | **production** (`grocerybuddy-prod.…workers.dev`) |
+            | `GroceryBuddy-*-preview-debug.apk` | **non-prod / preview** (`shopping-list-api.…workers.dev`) |
+
+            Download an APK below and install it on your Android device (you may need to allow installing apps from unknown sources / this browser).
+          files: |
+            GroceryBuddy-${{ steps.version.outputs.name }}.apk
+            GroceryBuddy-${{ steps.version.outputs.name }}-preview-debug.apk

@@ -36,6 +36,11 @@ default:
 # app/build/outputs/apk/debug/app-debug.apk
 ```
 
+You don't have to build it yourself: every GitHub release also carries a
+pre-built debug APK named `GroceryBuddy-<version>-preview-debug.apk` (alongside
+`GroceryBuddy-<version>.apk`, which points at production). See the
+[Releases page](https://github.com/finnegan0596/ShoppingList/releases).
+
 ## Preview loop
 
 Deploy the Worker and apply migrations to the **non-prod** environment:
